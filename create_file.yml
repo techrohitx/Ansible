@@ -1,0 +1,8 @@
+---
+- name: Create a file
+  hosts: localhost
+  tasks:
+  - name:
+    ansible.builtin.file:
+    path: /root/ansible.txt
+    state: touch

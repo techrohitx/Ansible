@@ -1,0 +1,25 @@
+# install http by using role concept
+---
+- name: install http
+  hosts: localhost
+  become: yes
+  vars:
+   - pkg: httpd
+   - svc: httpd
+   - file: /var/www/html/index.html
+  tasks:
+  - name: install httpd
+    ansible.builtin.dnf:
+      name: "{{pkg}}"
+      state: present
+  # start and enabled httpd   
+  - name: start and enabled httpd
+    ansible.builtin.systemd_service:
+      name: "{{svc}}"
+      state: started
+      enabled: true  
+  #deploy index.html
+  - name: deploy index.html file
+    ansible.builtin.copy:
+      src: index.html
+      dest: "{{file}}"

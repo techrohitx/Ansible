@@ -1,0 +1,56 @@
+# deploy of 2-tire app using single ansible
+# app-server
+---
+- name: installation of appserver
+  hosts: appserver
+  become: yes
+  vars: 
+   packages:
+      - nginx
+      - php
+      - php-fpm
+   services:
+    - nginx
+    - php-fpm
+   web_file_path: /usr/share/nginx/html/index.php 
+  tasks: 
+  - name: install nginx, php, php-fpm
+    ansible.builtin.dnf:
+      name: "{{packages}}"
+      state: present
+  - name: start and enable nginx php php-fpm
+    ansible.builtin.systemd_service:
+      name : "{{item}}"
+      state: started
+      enabled: true
+    loop: "{{services}}"
+  - name: deploy php page 
+    ansible.builtin.copy:
+       dest: "{{web_file_path}}"
+       content:
+        <?php
+        phpinfo();
+        ?>     
+# db server
+- name: installation on dbserver
+  hosts: dbserver
+  become: yes
+  vars:
+   db_pkg: mariadb105-server
+   db_service: mariadb
+   db_name: FTC
+  tasks: 
+  - name: install mariadb
+    ansible.builtin.dnf:
+      name: "{{db_pkg}}"
+      state: present
+  - name: start and enable mariadb     
+    ansible.builtin.systemd_service:
+      name : "{{db_service}}"
+      state: started
+      enabled: true
+      # create database
+  - name: create a database
+    ansible.builtin.shell: |
+      mysql -u root -e "CREATE DATABASE IF NOT EXISTS {{ db_name }};"
+

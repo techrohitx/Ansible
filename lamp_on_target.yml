@@ -1,0 +1,29 @@
+# install lamp on target server in optimize format
+---
+- name: install lamp on target server
+  hosts: targetserver
+  become: yes
+  tasks:
+  - name: install httpd, mariadb ,php
+    ansible.builtin.dnf:
+      name:
+       - httpd
+       - mariadb105-server
+       - php
+       - php-fpm
+      state: present
+  - name: start and enable httpd
+    ansible.builtin.systemd_service:
+      name: "{{item}}"
+      state: started
+      enabled: true
+    loop:
+     - httpd
+     - mariadb
+     - php-fpm
+  - name: deploy html page
+    ansible.builtin.copy:
+     dest: /var/www/html/index.html
+     content: |
+      <h1>this is my target server</h1> 
+      

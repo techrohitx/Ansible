@@ -1,0 +1,49 @@
+# install nginx with handler block
+---
+- name: deploy of nginx with handler
+  hosts: targetserver
+  become: yes
+  vars:
+   pkg: nginx
+   svc: nginx
+   file_path: /usr/share/nginx/html/index.html
+   conf_file: /etc/nginx/conf.d/custom.conf
+  tasks:
+  #install nginx
+  - name: install nginx
+    ansible.builtin.dnf:
+      name: "{{pkg}}"
+      state: present 
+  # start and enable nginx
+  - name: start and enable nginx
+    ansible.builtin.systemd_service:
+       name: "{{svc}}"
+       state: started
+       enabled: yes
+  - name: add configuration
+  # add configuartion file block
+    ansible.builtin.blockinfile:
+      path: "{{conf_file}}"
+      create: yes
+      block: |
+           server { 
+             listen 81;
+             root /usr/share/nginx/html/; 
+             index index.html;
+              } 
+              
+    notify: restart nginx
+# deploy index.html
+  - name : deploy of index page
+    ansible.builtin.copy:
+     dest: "{{file_path}}"
+     content: <h1> this app is with handler from {{inventory_hostname}}</h1>
+  # defind handlers
+  handler:
+  - name: restart nginx
+    ansible.builtin.systemd_service:
+      name: "{{svc}}"
+      state: restarted
+
+
+     

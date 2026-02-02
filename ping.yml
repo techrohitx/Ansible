@@ -1,0 +1,7 @@
+# ping command -> check connection
+---
+- name: check the connectivity
+  host: localhost
+  tasks: 
+   - name: check the connectivity using ping command
+     ansible.builtin.ping:
